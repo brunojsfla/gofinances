@@ -1,5 +1,5 @@
 import styled from "styled-components/native";
-import { FlatList } from "react-native";
+import { FlatList, FlatListProps } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { getStatusBarHeight } from "react-native-iphone-x-helper";
@@ -85,7 +85,7 @@ export const Title = styled.Text`
 `;
 
 export const TransactionList = styled(
-  FlatList as new () => FlatList<TransactionCardListProps>
+  FlatList as new (props: FlatListProps<TransactionCardListProps>) => FlatList<TransactionCardListProps>
 ).attrs({
   showsVerticalScrollIndicator: false,
   contentContainerStyle: {
