@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 import { HighlightCard } from "../../components/HighlightCard";
 import { TransactionCard, CardProps } from "../../components/TransactionCard";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 import {
   Container,
@@ -25,32 +28,53 @@ export interface TransactionCardListProps extends CardProps {
 }
 
 export function Dashboard() {
-  const data: TransactionCardListProps[] = [
-    {
-      id: "1",
-      type: "positive",
-      title: "Bugs Courart",
-      amount: "R$ 1.000,00",
-      category: { name: "Trabalho", icon: "dollar-sign" },
-      date: "28/02/2022",
-    },
-    {
-      id: "2",
-      type: "negative",
-      title: "Prestação AP",
-      amount: "R$ 1.000,00",
-      category: { name: "Fixo", icon: "shopping-bag" },
-      date: "28/02/2022",
-    },
-    {
-      id: "3",
-      type: "positive",
-      title: "Bugs Courart",
-      amount: "R$ 1.000,00",
-      category: { name: "Trabalho", icon: "dollar-sign" },
-      date: "28/02/2022",
-    },
-  ];
+  const dataKey = "@gofinances:transactions";
+
+  const [transactionCard, setTransactionCard] = useState<
+    TransactionCardListProps[]
+  >([]);
+
+  async function getTransactions() {
+    const data = await AsyncStorage.getItem(dataKey);
+    const transactions = data ? JSON.parse(data) : [];
+
+    const transactionsFormatted: TransactionCardListProps[] = transactions.map(
+      (item: TransactionCardListProps) => {
+        const amount = Number(item.amount).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
+
+        const date = Intl.DateTimeFormat("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }).format(new Date(item.date));
+
+        return {
+          id: item.id,
+          name: item.name,
+          amount,
+          category: item.category,
+          date,
+          type: item.type
+        };
+      }
+    );
+    console.log(transactionsFormatted);
+    setTransactionCard(transactionsFormatted);
+  }
+
+  useEffect(() => {
+    getTransactions();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      getTransactions();
+    }, [])
+  );
+
   return (
     <Container>
       <Header>
@@ -96,7 +120,7 @@ export function Dashboard() {
       <Transactions>
         <Title>Listagem</Title>
         <TransactionList
-          data={data}
+          data={transactionCard}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <TransactionCard data={item} />}
         />

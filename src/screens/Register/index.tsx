@@ -31,7 +31,7 @@ interface FormData {
 
 type NavigationProps = {
   navigate: (screen: string) => void;
-}
+};
 
 const dataKey = "@gofinances:transactions";
 
@@ -59,7 +59,7 @@ export function Register() {
 
   const navigation = useNavigation<NavigationProps>();
 
-  const handleTransactionTypesSelect = (type: "up" | "down") => {
+  const handleTransactionTypesSelect = (type: "positive" | "negative") => {
     setTransactionType(type);
   };
 
@@ -81,7 +81,7 @@ export function Register() {
       id: String(uuid.v4()),
       name: form.name,
       amount: form.amount,
-      transactionType,
+      type: transactionType,
       category: category.key,
       date: new Date(),
     };
@@ -106,15 +106,6 @@ export function Register() {
       Alert.alert("Não foi possível salvar os dados!");
     }
   };
-
-  useEffect(() => {
-    async function loadData() {
-      const data = await AsyncStorage.getItem(dataKey);
-      console.log('Itens: ', JSON.parse(data!));
-    }
-
-    loadData();
-  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -143,14 +134,14 @@ export function Register() {
               <TransactionTypeButton
                 title="Income"
                 type="up"
-                onPress={() => handleTransactionTypesSelect("up")}
-                isActive={transactionType === "up"}
+                onPress={() => handleTransactionTypesSelect("positive")}
+                isActive={transactionType === "positive"}
               />
               <TransactionTypeButton
                 title="Outcome"
                 type="down"
-                onPress={() => handleTransactionTypesSelect("down")}
-                isActive={transactionType === "down"}
+                onPress={() => handleTransactionTypesSelect("negative")}
+                isActive={transactionType === "negative"}
               />
             </TransactionTypes>
             <CategorySelectButton
