@@ -34,14 +34,66 @@ export interface TransactionCardListProps extends CardProps {
 
 interface HighlightProps {
   total: string;
+  lastTransaction: string;
 }
 interface HighlightData {
   entries: HighlightProps;
   expensives: HighlightProps;
-  balance: string;
+  balance: HighlightProps;
 }
 
 export function Dashboard() {
+  const months = [
+    {
+      id: 0,
+      name: "janeiro",
+    },
+    {
+      id: 1,
+      name: "fevereiro",
+    },
+    {
+      id: 2,
+      name: "março",
+    },
+    {
+      id: 3,
+      name: "abril",
+    },
+    {
+      id: 4,
+      name: "maio",
+    },
+    {
+      id: 5,
+      name: "junho",
+    },
+    {
+      id: 6,
+      name: "julho",
+    },
+    {
+      id: 7,
+      name: "agosto",
+    },
+    {
+      id: 8,
+      name: "setembro",
+    },
+    {
+      id: 9,
+      name: "outubro",
+    },
+    {
+      id: 10,
+      name: "novembro",
+    },
+    {
+      id: 11,
+      name: "dezembro",
+    },
+  ];
+
   const dataKey = "@gofinances:transactions";
 
   const [transactionCard, setTransactionCard] = useState<
@@ -54,6 +106,26 @@ export function Dashboard() {
 
   const [loading, setLoading] = useState(true);
   const { colors } = useTheme();
+
+  function getLastTransactionDate(
+    collection: TransactionCardListProps[],
+    transactionType: "positive" | "negative"
+  ) {
+    const lastTransactions = new Date(
+      Math.max.apply(
+        Math,
+        collection
+          .filter((transaction) => transaction.type === transactionType)
+          .map((transaction) => new Date(transaction.date).getTime())
+      )
+    );
+
+    const monthFormatted = months
+      .filter((month) => month.id === lastTransactions.getMonth())
+      .map((month) => month.name);
+
+    return `${lastTransactions.getDate()} de ${monthFormatted}`;
+  }
 
   async function getTransactions() {
     const data = await AsyncStorage.getItem(dataKey);
@@ -93,23 +165,40 @@ export function Dashboard() {
     );
 
     setTransactionCard(transactionsFormatted);
+
+    const lastTransactionsEntries = getLastTransactionDate(
+      transactions,
+      "positive"
+    );
+    const lastTransactionsExpensives = getLastTransactionDate(
+      transactions,
+      "negative"
+    );
+
+    const totalInterval = `01 à ${lastTransactionsExpensives}`;
+
     setHighlightData({
       entries: {
         total: entriesTotal.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         }),
+        lastTransaction: `Última entrada dia ${lastTransactionsEntries}`,
       },
       expensives: {
         total: expensiveTotal.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         }),
+        lastTransaction: `Última saída dia ${lastTransactionsExpensives}`,
       },
-      balance: Number(entriesTotal - expensiveTotal).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-      }),
+      balance: {
+        total: Number(entriesTotal - expensiveTotal).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }),
+        lastTransaction: totalInterval,
+      }
     });
 
     setLoading(false);
@@ -157,19 +246,19 @@ export function Dashboard() {
             <HighlightCard
               title="Entradas"
               amount={highlightData.entries.total}
-              lastTransaction="Última entrada dia 13 de abril"
+              lastTransaction={highlightData.entries.lastTransaction}
               type="up"
             />
             <HighlightCard
               title="Saídas"
               amount={highlightData.expensives.total}
-              lastTransaction="Última saída dia 13 de abril"
+              lastTransaction={highlightData.expensives.lastTransaction}
               type="down"
             />
             <HighlightCard
               title="Total"
-              amount={highlightData.balance}
-              lastTransaction="Saldo do mês de fevereiro"
+              amount={highlightData.balance.total}
+              lastTransaction={highlightData.balance.lastTransaction}
               type="total"
             />
           </HighlightCards>
