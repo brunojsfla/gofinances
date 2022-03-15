@@ -124,7 +124,9 @@ export function Dashboard() {
       .filter((month) => month.id === lastTransactions.getMonth())
       .map((month) => month.name);
 
-    return `${lastTransactions.getDate()} de ${monthFormatted}`;
+    return isNaN(lastTransactions.getTime())
+      ? false
+      : `${lastTransactions.getDate()} de ${monthFormatted}`;
   }
 
   async function getTransactions() {
@@ -183,14 +185,18 @@ export function Dashboard() {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransaction: `Última entrada dia ${lastTransactionsEntries}`,
+        lastTransaction: !lastTransactionsEntries
+          ? ""
+          : `Última entrada dia ${lastTransactionsEntries}`,
       },
       expensives: {
         total: expensiveTotal.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransaction: `Última saída dia ${lastTransactionsExpensives}`,
+        lastTransaction: !lastTransactionsExpensives
+          ? ""
+          : `Última saída dia ${lastTransactionsExpensives}`,
       },
       balance: {
         total: Number(entriesTotal - expensiveTotal).toLocaleString("pt-BR", {
@@ -198,7 +204,7 @@ export function Dashboard() {
           currency: "BRL",
         }),
         lastTransaction: totalInterval,
-      }
+      },
     });
 
     setLoading(false);
