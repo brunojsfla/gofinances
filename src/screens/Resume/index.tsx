@@ -26,6 +26,8 @@ import { VictoryPie } from "victory-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
+import { useAuth } from "../../hooks/auth";
+
 interface TransactionData {
   type: "positive" | "negative";
   name: string;
@@ -49,6 +51,7 @@ export function Resume() {
   const [totalByCategories, setTotalByCategories] = useState<
     TotalByCategoryData[]
   >([]);
+  const { user } = useAuth();
 
   const { colors } = useTheme();
 
@@ -62,7 +65,7 @@ export function Resume() {
 
   async function loadData() {
     setLoading(true);
-    const dataKey = "@gofinances:transactions";
+    const dataKey = `@gofinances:transactions_user:${user.id}`;
     const response = await AsyncStorage.getItem(dataKey);
     const responseFormatted = response ? JSON.parse(response) : [];
 

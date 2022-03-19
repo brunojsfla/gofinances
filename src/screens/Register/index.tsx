@@ -25,6 +25,8 @@ import uuid from "react-native-uuid";
 
 import { useNavigation } from "@react-navigation/native";
 
+import { useAuth } from "../../hooks/auth";
+
 interface FormData {
   [x: string]: any;
 }
@@ -32,8 +34,6 @@ interface FormData {
 type NavigationProps = {
   navigate: (screen: string) => void;
 };
-
-const dataKey = "@gofinances:transactions";
 
 const schema = yup.object().shape({
   name: yup.string().required("O Nome não foi informado."),
@@ -47,6 +47,7 @@ export function Register() {
   });
   const [transactionType, setTransactionType] = useState("");
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const { user } = useAuth();
 
   const {
     handleSubmit,
@@ -87,6 +88,7 @@ export function Register() {
     };
 
     try {
+      const dataKey = `@gofinances:transactions_user:${user.id}`;
       const data = await AsyncStorage.getItem(dataKey);
       const currentData = data ? JSON.parse(data) : [];
 

@@ -26,7 +26,8 @@ import {
   LogoutButton,
   LoadData,
 } from "./styles";
-import { color } from "react-native-reanimated";
+
+import { useAuth } from "../../hooks/auth";
 
 export interface TransactionCardListProps extends CardProps {
   id: string;
@@ -43,6 +44,8 @@ interface HighlightData {
 }
 
 export function Dashboard() {
+  const {sigOut, user} = useAuth();
+
   const months = [
     {
       id: 0,
@@ -94,7 +97,7 @@ export function Dashboard() {
     },
   ];
 
-  const dataKey = "@gofinances:transactions";
+  
 
   const [transactionCard, setTransactionCard] = useState<
     TransactionCardListProps[]
@@ -130,6 +133,7 @@ export function Dashboard() {
   }
 
   async function getTransactions() {
+    const dataKey = `@gofinances:transactions_user:${user.id}`;
     const data = await AsyncStorage.getItem(dataKey);
     const transactions = data ? JSON.parse(data) : [];
 
@@ -234,15 +238,15 @@ export function Dashboard() {
               <UserInfo>
                 <Photo
                   source={{
-                    uri: "https://avatars.githubusercontent.com/u/42036434?v=4",
+                    uri: user.photo,
                   }}
                 />
                 <User>
                   <UserGreeting>Olá,</UserGreeting>
-                  <UserName>Bruno!</UserName>
+                  <UserName>{user.name}!</UserName>
                 </User>
               </UserInfo>
-              <LogoutButton onPress={() => {}}>
+              <LogoutButton onPress={sigOut}>
                 <Icon name="power" />
               </LogoutButton>
             </UserWraper>
